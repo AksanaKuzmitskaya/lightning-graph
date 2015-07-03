@@ -5,7 +5,7 @@
     "d3": "^3.5.5",
     "d3-multiaxis-zoom": "^1.0.4",
     "lightning-client-utils": "^0.6.3",
-    "lightning-visualization": "^0.0.4"
+    "lightning-visualization": "^0.0.5"
   },
   "license": "MIT",
   "keywords": [
