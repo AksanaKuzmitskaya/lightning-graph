@@ -1,7 +1,7 @@
 
 var LightningVisualization = require('lightning-visualization');
 var d3 = require('d3');
-require('d3-multiaxis-zoom')(d3);
+var MultiaxisZoom = require('d3-multiaxis-zoom');
 var utils = require('lightning-client-utils');
 
 /*
@@ -13,6 +13,7 @@ var Visualization = LightningVisualization.extend({
     defaultSize: 8,
 
     init: function() {
+        MultiaxisZoom(d3);
         this.render();
     },
 
