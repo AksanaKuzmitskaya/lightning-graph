@@ -101,6 +101,9 @@ var Visualization = LightningVisualization.extend({
             .domain(yDomain)
             .range([height - padding, 0 + padding]);
 
+        this.x = x;
+        this.y = y;
+
         var zoom = d3.behavior.zoom()
             .x(x)
             .y(y)
@@ -142,16 +145,11 @@ var Visualization = LightningVisualization.extend({
                 .attr('xlink:href', utils.getThumbnail(images));
         }
 
-        var line = d3.svg.line()
-            .x(function(d){return x(d.x);})
-            .y(function(d){return y(d.y);})
-            .interpolate('linear');
-
         var link = svg.selectAll('.link')
             .data(links)
             .enter().append('path')
             .attr('class', 'link')
-            .attr('d', function(d) { return line([nodes[d.source], nodes[d.target]]); })
+            .attr('d', this.getLinkPathFunction())
             .style('stroke-width', function(d) { return 1 * Math.sqrt(d.value); })
             .style('stroke', linkStrokeColor)
             .style('fill', 'none')
@@ -224,6 +222,22 @@ var Visualization = LightningVisualization.extend({
            .on('mouseleave', selectedNodeOpacityOut);
 
     },
+
+    getLine: function() {
+        var self = this;
+        return d3.svg.line()
+            .x(function(d){return self.x(d.x);})
+            .y(function(d){return self.y(d.y);})
+            .interpolate('linear');
+    },
+
+    getLinkPathFunction: function() {
+        var self = this;
+        var line = this.getLine();
+        return function(d) {
+            return line([self.data.nodes[d.source], self.data.nodes[d.target]]);    
+        }        
+    }
 
     // updateData: function(formattedData) {
     //     this.data = formattedData;
