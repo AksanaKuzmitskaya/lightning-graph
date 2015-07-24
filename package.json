@@ -1,6 +1,6 @@
 {
   "name": "lightning-graph",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "dependencies": {
     "d3": "^3.5.5",
     "d3-multiaxis-zoom": "^1.0.4",
