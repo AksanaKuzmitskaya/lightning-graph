@@ -189,7 +189,6 @@ var Visualization = LightningVisualization.extend({
             linkedByIndex[i + ',' + i] = 1;
         };
         links.forEach(function (l) {
-
             linkedByIndex[self.getSource(l) + ',' + self.getTarget(l)] = 1;
         });
 
