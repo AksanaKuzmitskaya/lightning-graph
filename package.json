@@ -6,12 +6,10 @@
     "d3-multiaxis-zoom": "^1.0.4",
     "lightning-client-utils": "^0.6.4",
     "lightning-visualization": "^0.0.5",
-    "lodash": "^3.8.0"
-  },
-  "license": "MIT",
-  "devDependencies": {
+    "lodash": "^3.8.0",
     "brfs": "^1.4.0"
   },
+  "license": "MIT",
   "keywords": [
     "lightning-visualization"
   ],
