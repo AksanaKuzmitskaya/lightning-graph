@@ -4,6 +4,9 @@ var _ = require('lodash')
 var MultiaxisZoom = require('d3-multiaxis-zoom');
 var utils = require('lightning-client-utils');
 
+var fs = require('fs');
+var styles = fs.readFileSync(__dirname + '/style.css');
+
 /*
  * Extend the base visualization object
  */
@@ -17,6 +20,8 @@ var Visualization = LightningVisualization.extend({
         MultiaxisZoom(d3);
         this.render();
     },
+
+    styles: styles,
 
     formatData: function(data) {
         var retColor = utils.getColorFromData(data);
@@ -247,7 +252,6 @@ var Visualization = LightningVisualization.extend({
                 var source = self.getSource(l)
                 var target = self.getTarget(l)
                 if (selected.length > 0) {
-                    checkSource(selected, l)
                     if (_.indexOf(selected, source) > -1 & _.indexOf(selected, target) > -1) {
                         alpha = 0.9
                     } else {

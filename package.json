@@ -9,11 +9,19 @@
     "lodash": "^3.8.0"
   },
   "license": "MIT",
+  "devDependencies": {
+    "brfs": "^1.4.0"
+  },
   "keywords": [
     "lightning-visualization"
   ],
   "engines": {
     "node": ">=0.8.0"
+  },
+  "browserify": {
+    "transform": [
+      "brfs"
+    ]
   },
   "lightning": {}
 }
