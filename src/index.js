@@ -188,8 +188,9 @@ var Visualization = LightningVisualization.extend({
         for (i = 0; i < nodes.length; i++) {
             linkedByIndex[i + ',' + i] = 1;
         };
-        links.forEach(function (d) {
-            linkedByIndex[d.source + ',' + d.target] = 1;
+        links.forEach(function (l) {
+
+            linkedByIndex[self.getSource(l) + ',' + self.getTarget(l)] = 1;
         });
 
         // look up neighbor pairs
@@ -244,15 +245,18 @@ var Visualization = LightningVisualization.extend({
 
             _.forEach(links, function(l) {
                 var alpha
+                var source = self.getSource(l)
+                var target = self.getTarget(l)
                 if (selected.length > 0) {
-                    if (_.indexOf(selected, l.source) > -1 & _.indexOf(selected, l.target) > -1) {
+                    checkSource(selected, l)
+                    if (_.indexOf(selected, source) > -1 & _.indexOf(selected, target) > -1) {
                         alpha = 0.9
                     } else {
                         alpha = 0.05
                     }
                 } 
                 if (highlighted.length > 0) {
-                    if (_.indexOf(highlighted, l.source) > -1 | _.indexOf(highlighted, l.target) > -1) {
+                    if (_.indexOf(highlighted, source) > -1 | _.indexOf(highlighted, target) > -1) {
                         alpha = 0.9
                     } else {
                         alpha = 0.05
@@ -262,13 +266,16 @@ var Visualization = LightningVisualization.extend({
                     alpha = linkStrokeOpacity
                 }
 
-                var line = self.getLine(l.source, l.target)
+                var line = self.getLine(l)
                 canvas.strokeStyle = utils.buildRGBA(linkStrokeColor, alpha);
                 canvas.lineWidth = 1 * Math.sqrt(l.value);
                 canvas.lineJoin = 'round';
                 canvas.beginPath();
                 canvas.moveTo(line[0][0], line[0][1])
-                canvas.lineTo(line[1][0], line[1][1]);
+                var i
+                for (i = 1; i < line.length; i++) { 
+                    canvas.lineTo(line[i][0], line[i][1]);
+                }
                 canvas.stroke()
 
             })
@@ -311,10 +318,18 @@ var Visualization = LightningVisualization.extend({
         draw();
     },
 
-    getLine: function(source, target) {
+    getSource: function(l) {
+        return l.source
+    },
+
+    getTarget: function(l) {
+        return l.target
+    },
+
+    getLine: function(link) {
         var self = this;
-        var start = self.data.nodes[source]
-        var end = self.data.nodes[target]
+        var start = self.data.nodes[link.source]
+        var end = self.data.nodes[link.target]
         return [[self.x(start.x), self.y(start.y)], [self.x(end.x), self.y(end.y)]]
     }
 
