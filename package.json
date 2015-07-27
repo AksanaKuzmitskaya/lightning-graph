@@ -1,6 +1,6 @@
 {
   "name": "lightning-graph",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "dependencies": {
     "d3": "^3.5.5",
     "d3-multiaxis-zoom": "^1.0.4",
@@ -15,6 +15,10 @@
   ],
   "engines": {
     "node": ">=0.8.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lightning-viz/lightning-graph.git"
   },
   "browserify": {
     "transform": [
