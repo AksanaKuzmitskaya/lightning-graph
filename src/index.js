@@ -14,7 +14,7 @@ var Visualization = LightningVisualization.extend({
 
     defaultFill: '#68a1e5',
     defaultStroke: 'white',
-    defaultSize: 8,
+    defaultSize: 6,
 
     init: function() {
         MultiaxisZoom(d3);
@@ -307,8 +307,10 @@ var Visualization = LightningVisualization.extend({
                     stroke = n.cstroke
                 }
 
+                var size = n.s ? n.s : self.defaultSize
+
                 canvas.beginPath();
-                canvas.arc(self.x(n.x), self.y(n.y), n.s, 0, 2 * Math.PI, false);
+                canvas.arc(self.x(n.x), self.y(n.y), size, 0, 2 * Math.PI, false);
                 canvas.fillStyle = utils.buildRGBA(n.cfill, alpha)
                 canvas.lineWidth = strokeWidth
                 canvas.strokeStyle = utils.buildRGBA(stroke, alpha)
