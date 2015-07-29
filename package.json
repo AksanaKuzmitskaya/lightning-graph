@@ -25,5 +25,7 @@
       "brfs"
     ]
   },
-  "lightning": {}
+  "lightning": {
+    "name": "graph"
+  }
 }
