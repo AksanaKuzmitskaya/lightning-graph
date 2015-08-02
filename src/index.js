@@ -5,55 +5,33 @@ var MultiaxisZoom = require('d3-multiaxis-zoom');
 var utils = require('lightning-client-utils');
 
 var fs = require('fs');
-var styles = fs.readFileSync(__dirname + '/style.css');
+var css = fs.readFileSync(__dirname + '/style.css');
 
 /*
  * Extend the base visualization object
  */
 var Visualization = LightningVisualization.extend({
 
-    defaultFill: '#68a1e5',
-    defaultStroke: 'white',
-    defaultSize: 6,
+    getDefaultStyles: function() {
+        return {
+            color: '#68a1e5',
+            stroke: 'white',
+            size: 6
+        }
+    },
 
     init: function() {
         MultiaxisZoom(d3);
         this.render();
     },
 
-    styles: styles,
-
-    formatData: function(data) {
-        var retColor = utils.getColorFromData(data);
-        var retSize = data.size || [];
-        var retName = data.name || [];
-
-        data.nodes = data.nodes.map(function (d,i) {
-            d.x = d[0];
-            d.y = d[1];
-            d.i = i;
-            d.n = retName[i];
-            d.c = retColor.length > 1 ? retColor[i] : retColor[0];
-            d.s = retSize.length > 1 ? retSize[i] : retSize[0];
-            return d;
-        });
-
-        data.links = data.links.map(function (d) {
-            d.source = d[0];
-            d.target = d[1];
-            d.value = d[2];
-            return d;
-        });
-
-        return data;
-    },
+    css: css,
 
     render: function() {
         
         var data = this.data;
         var width = this.width;
         var height = this.height;
-        var opts = this.opts;
         var selector = this.selector;
         var self = this;
 
@@ -61,7 +39,7 @@ var Visualization = LightningVisualization.extend({
         var links = data.links;
 
         // if points are colored use gray, otherwise use our default
-        var linkStrokeColor = nodes[0].c ? '#999' : '#A38EF3';
+        var linkStrokeColor = (data.label || data.color) ? '#999' : '#A38EF3';
 
         // set opacity inversely proportional to number of links
         var linkStrokeOpacity = Math.max(1 - 0.0005 * links.length, 0.5);
@@ -234,12 +212,6 @@ var Visualization = LightningVisualization.extend({
             shiftKey = false
         });
 
-        _.map(nodes, function(d) {
-            d.cfill = d.c ? d.c : self.defaultFill
-            d.cstroke = d.c ? d.c.darker(0.75) : self.defaultStroke
-            return d
-        })
-
         function redraw() {
             canvas.clearRect(0, 0, width, height);
             draw()
@@ -304,14 +276,12 @@ var Visualization = LightningVisualization.extend({
                 if (_.indexOf(highlighted, n.i) >= 0) {
                     stroke = "black"
                 } else {
-                    stroke = n.cstroke
+                    stroke = n.k
                 }
 
-                var size = n.s ? n.s : self.defaultSize
-
                 canvas.beginPath();
-                canvas.arc(self.x(n.x), self.y(n.y), size, 0, 2 * Math.PI, false);
-                canvas.fillStyle = utils.buildRGBA(n.cfill, alpha)
+                canvas.arc(self.x(n.x), self.y(n.y), n.s, 0, 2 * Math.PI, false);
+                canvas.fillStyle = utils.buildRGBA(n.c, alpha)
                 canvas.lineWidth = strokeWidth
                 canvas.strokeStyle = utils.buildRGBA(stroke, alpha)
                 canvas.fill()
@@ -321,6 +291,37 @@ var Visualization = LightningVisualization.extend({
         }
 
         draw();
+    },
+
+    formatData: function(data) {
+        var retColor = utils.getColorFromData(data);
+        var retSize = data.size || [];
+        var retName = data.name || [];
+        var styles = this.styles
+
+        var c, s, k
+
+        data.nodes = data.nodes.map(function (d,i) {
+            d.x = d[0]
+            d.y = d[1]
+            d.i = i
+            d.n = retName[i]
+            c = retColor.length > 1 ? retColor[i] : retColor[0]
+            s = retSize.length > 1 ? retSize[i] : retSize[0]
+            d.c = c ? c : styles.color
+            d.k = c ? c.darker(0.75) : styles.stroke
+            d.s = s ? s : styles.size
+            return d;
+        });
+
+        data.links = data.links.map(function (d) {
+            d.source = d[0];
+            d.target = d[1];
+            d.value = d[2];
+            return d;
+        });
+
+        return data;
     },
 
     getSource: function(l) {
@@ -337,18 +338,6 @@ var Visualization = LightningVisualization.extend({
         var end = self.data.nodes[link.target]
         return [[self.x(start.x), self.y(start.y)], [self.x(end.x), self.y(end.y)]]
     }
-
-    // updateData: function(formattedData) {
-    //     this.data = formattedData;
-    //     // TODO: re-render the visualization
-    // },
-
-    // appendData: function(formattedData) {        
-    //     // TODO: update this.data to include the newly
-    //     //       added formattedData
-
-    //     // TODO: re-render the visualization
-    // }
 
 });
 
