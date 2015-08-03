@@ -47,39 +47,8 @@ var Visualization = LightningVisualization.extend({
         // set circle stroke thickness based on number of nodes
         var strokeWidth = nodes.length > 500 ? 1 : 1.1
 
-        var xDomain = d3.extent(nodes, function(d) {
-            return d.x;
-        });
-
-        var yDomain = d3.extent(nodes, function(d) {
-            return d.y;
-        });
-
-        var sizeMax = d3.max(nodes, function(d) {
-                return d.s;
-            });
-
-        if (sizeMax) {
-            var padding = sizeMax * 2
-        } else {
-            var padding = 8 * 2 + 10
-        }
-
-        var xRng = Math.abs(xDomain[1] - xDomain[0])
-        var yRng = Math.abs(yDomain[1] - yDomain[0])
-
-        xDomain[0] -= xRng * 0.025
-        xDomain[1] += xRng * 0.025
-        yDomain[0] -= yRng * 0.025
-        yDomain[1] += yRng * 0.025
-
-        this.x = d3.scale.linear()
-            .domain(xDomain)
-            .range([0, width]);
-
-        this.y = d3.scale.linear()
-            .domain(yDomain)
-            .range([height, 0]);
+        this.makeScales()
+        this.setScales()
 
         var zoom = d3.behavior.zoom()
             .x(self.x)
@@ -291,6 +260,7 @@ var Visualization = LightningVisualization.extend({
         }
 
         draw();
+
     },
 
     formatData: function(data) {
@@ -322,6 +292,47 @@ var Visualization = LightningVisualization.extend({
         });
 
         return data;
+    },
+
+    makeScales: function() {
+        var self = this
+
+        var xDomain = d3.extent(self.data.nodes, function(d) {
+            return d.x;
+        });
+
+        var yDomain = d3.extent(self.data.nodes, function(d) {
+            return d.y;
+        });
+
+        var sizeMax = d3.max(self.data.nodes, function(d) {
+                return d.s;
+            });
+
+        if (sizeMax) {
+            var padding = sizeMax * 2
+        } else {
+            var padding = 8 * 2 + 10
+        }
+
+        var xRng = Math.abs(xDomain[1] - xDomain[0])
+        var yRng = Math.abs(yDomain[1] - yDomain[0])
+
+        xDomain[0] -= xRng * 0.025
+        xDomain[1] += xRng * 0.025
+        yDomain[0] -= yRng * 0.025
+        yDomain[1] += yRng * 0.025
+
+        this.x = d3.scale.linear()
+            .domain(xDomain)
+
+        this.y = d3.scale.linear()
+            .domain(yDomain)
+    },
+
+    setScales: function() {
+        this.x.range([0, this.width])
+        this.y.range([this.height, 0])
     },
 
     getSource: function(l) {
