@@ -19,7 +19,8 @@ var Visualization = LightningVisualization.extend({
     getDefaultOptions: function() {
         return {
             brush: true,
-            tooltips: true
+            tooltips: true,
+            zoom: true
         }
     },
 
@@ -76,6 +77,11 @@ var Visualization = LightningVisualization.extend({
             .on("click", mouseHandler)
             .on("dblclick.zoom", null)
             .node().getContext("2d")
+
+        if (!self.options.zoom) {
+            canvas.on("wheel.zoom", null);
+            canvas.on("mousewheel.zoom", null);
+        }
 
         function mouseHandler() {
             if (d3.event.defaultPrevented) return;
