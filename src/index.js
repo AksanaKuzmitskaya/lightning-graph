@@ -390,20 +390,23 @@ var Visualization = LightningVisualization.extend({
         }
 
         this.tooltipEl = document.createElement('div');
-            
         this.tooltipEl.innerHTML = label;
-        this.tooltipEl.style.left = (this.x(d.x) + this.margin.left - 50) + 'px';
-        this.tooltipEl.style.bottom = (this.height - this.y(d.y) + d.s + 5) + 'px';
-        this.tooltipEl.style.position = 'absolute';
-        this.tooltipEl.style.backgroundColor = 'rgba(0, 0, 0, 0.65)';
-        this.tooltipEl.style.textAlign = 'center';
-        this.tooltipEl.style.color = 'white';
-        this.tooltipEl.style.paddingTop = '5px';
-        this.tooltipEl.style.paddingBottom = '5px';
-        this.tooltipEl.style.fontSize = '12px';
-        this.tooltipEl.style.borderRadius = '4px';
-        this.tooltipEl.style.width = '100px';
-        this.tooltipEl.style.zIndex = '999';
+
+        var styles = {
+            left: (this.x(d.x) + this.margin.left - 50) + 'px',
+            bottom: (this.height - this.y(d.y) + d.s + 5) + 'px',
+            position: 'absolute',
+            backgroundColor: 'rgba(0, 0, 0, 0.65)',
+            textAlign: 'center',
+            color: 'white',
+            paddingTop: '5px',
+            paddingBottom: '5px',
+            fontSize: '12px',
+            borderRadius: '4px',
+            width: '100px',
+            zIndex: '999'
+        }
+        _.extend(this.tooltipEl.style, styles)
 
     },
 
