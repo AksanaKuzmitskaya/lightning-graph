@@ -3,13 +3,9 @@ var d3 = require('d3');
 var _ = require('lodash')
 var MultiaxisZoom = require('d3-multiaxis-zoom');
 var utils = require('lightning-client-utils');
-
 var fs = require('fs');
 var css = fs.readFileSync(__dirname + '/style.css');
 
-/*
- * Extend the base visualization object
- */
 var Visualization = LightningVisualization.extend({
 
     getDefaultStyles: function() {
@@ -20,8 +16,16 @@ var Visualization = LightningVisualization.extend({
         }
     },
 
+    getDefaultOptions: function() {
+        return {
+            brush: true,
+            tooltips: true
+        }
+    },
+
     init: function() {
         MultiaxisZoom(d3);
+        this.margin = {top: 0, right: 0, bottom: 0, left: 0};
         this.render();
     },
 
@@ -33,13 +37,14 @@ var Visualization = LightningVisualization.extend({
         var width = this.width;
         var height = this.height;
         var selector = this.selector;
+        var options = this.options;
         var self = this;
 
         var nodes = data.nodes;
         var links = data.links;
 
         // if points are colored use gray, otherwise use our default
-        var linkStrokeColor = (data.label || data.color) ? '#999' : '#A38EF3';
+        var linkStrokeColor = (data.group || data.color) ? '#999' : '#A38EF3';
 
         // set opacity inversely proportional to number of links
         var linkStrokeOpacity = Math.max(1 - 0.0005 * links.length, 0.5);
@@ -57,6 +62,8 @@ var Visualization = LightningVisualization.extend({
 
         var container = d3.select(selector)
             .append('div')
+            .style('position', 'relative')
+            .style('overflow', 'hidden')
             .style('width', width + "px")
             .style('height', height + "px")
 
@@ -78,10 +85,11 @@ var Visualization = LightningVisualization.extend({
             if (found) {
                 highlighted = []
                 highlighted.push(found.i)
-                //self.emit('hover', found);
+                self.emit('hover', found);
             } else {
                 highlighted = []
                 selected = []
+                self.removeTooltip();
             };
             redraw();
         }
@@ -90,45 +98,80 @@ var Visualization = LightningVisualization.extend({
         var highlighted = [];
         var shiftKey;
 
-        var brush = d3.svg.brush()
-            .x(self.x)
-            .y(self.y)
-            .on("brushstart", function() {
-                // remove any highlighting
-                highlighted = []
-                // select a point if we click without extent
-                var pos = d3.mouse(this)
-                var found = utils.nearestPoint(nodes, pos, self.x, self.y)
-                if (found) {
-                    if (_.indexOf(selected, found.i) == -1) {
-                        selected.push(found.i)
-                    } else {
-                        _.remove(selected, function(d) {return d == found.i})
-                    }
-                    redraw();
-                }
-            })
-            .on("brush", function() {
-                var extent = d3.event.target.extent();
-                if (Math.abs(extent[0][0] - extent[1][0]) > 0 & Math.abs(extent[0][1] - extent[1][1]) > 0) {
-                    selected = []
-                    var x = self.x
-                    var y = self.y
-                    _.forEach(nodes, function(n) {
-                        var cond1 = (n.x > extent[0][0] & n.x < extent[1][0])
-                        var cond2 = (n.y > extent[0][1] & n.y < extent[1][1])
-                        if (cond1 & cond2) {
-                            selected.push(n.i)
-                        }
-                    })
-                    redraw();
-                }
-            })
-            .on("brushend", function() {
-                d3.event.target.clear();
-                d3.select(this).call(d3.event.target);
-            })
+        // setup brushing
+        if (options.brush) {
 
+            var brush = d3.svg.brush()
+                .x(self.x)
+                .y(self.y)
+                .on("brushstart", function() {
+                    // remove any highlighting
+                    highlighted = []
+                    self.removeTooltip();
+                    // select a point if we click without extent
+                    var pos = d3.mouse(this)
+                    var found = utils.nearestPoint(nodes, pos, self.x, self.y)
+                    if (found) {
+                        if (_.indexOf(selected, found.i) == -1) {
+                            selected.push(found.i)
+                        } else {
+                            _.remove(selected, function(d) {return d == found.i})
+                        }
+                        redraw();
+                    }
+                })
+                .on("brush", function() {
+                    var extent = d3.event.target.extent();
+                    if (Math.abs(extent[0][0] - extent[1][0]) > 0 & Math.abs(extent[0][1] - extent[1][1]) > 0) {
+                        selected = []
+                        var x = self.x
+                        var y = self.y
+                        _.forEach(nodes, function(n) {
+                            var cond1 = (n.x > extent[0][0] & n.x < extent[1][0])
+                            var cond2 = (n.y > extent[0][1] & n.y < extent[1][1])
+                            if (cond1 & cond2) {
+                                selected.push(n.i)
+                            }
+                        })
+                        redraw();
+                    }
+                })
+                .on("brushend", function() {
+                    d3.event.target.clear();
+                    d3.select(this).call(d3.event.target);
+                })
+
+            var brushrect = container
+                .append('svg:svg')
+                .attr('class', 'graph-plot brush-container')
+                .attr('width', width)
+                .attr('height', height)
+            .append("g")
+                .attr('class', 'brush')
+                .call(brush)
+
+            d3.selectAll('.brush .background')
+                .style('cursor', 'default')
+            d3.selectAll('.brush')
+                .style('pointer-events', 'none')
+
+            d3.select(selector).on("keydown", function() {
+                shiftKey = d3.event.shiftKey;
+                if (shiftKey) {
+                    d3.selectAll('.brush').style('pointer-events', 'all')
+                    d3.selectAll('.brush .background').style('cursor', 'crosshair')
+                }
+            });
+
+            d3.select(selector).on("keyup", function() {
+                if (shiftKey) {
+                    d3.selectAll('.brush').style('pointer-events', 'none')
+                    d3.selectAll('.brush .background').style('cursor', 'default')
+                }
+                shiftKey = false
+            });
+
+        }
 
         function zoomed() {
             redraw();
@@ -149,37 +192,8 @@ var Visualization = LightningVisualization.extend({
             return linkedByIndex[a + ',' + b];
         }
 
-        var brushrect = container
-            .append('svg:svg')
-            .attr('class', 'graph-plot brush-container')
-            .attr('width', width)
-            .attr('height', height)
-        .append("g")
-            .attr('class', 'brush')
-            .call(brush)
-
-        d3.selectAll('.brush .background')
-            .style('cursor', 'default')
-        d3.selectAll('.brush')
-            .style('pointer-events', 'none')
-
+    
         d3.select(selector).attr("tabindex", -1)
-
-        d3.select(selector).on("keydown", function() {
-            shiftKey = d3.event.shiftKey;
-            if (shiftKey) {
-                d3.selectAll('.brush').style('pointer-events', 'all')
-                d3.selectAll('.brush .background').style('cursor', 'crosshair')
-            }
-        });
-
-        d3.select(selector).on("keyup", function() {
-            if (shiftKey) {
-                d3.selectAll('.brush').style('pointer-events', 'none')
-                d3.selectAll('.brush .background').style('cursor', 'default')
-            }
-            shiftKey = false
-        });
 
         function redraw() {
             canvas.clearRect(0, 0, width, height);
@@ -257,6 +271,10 @@ var Visualization = LightningVisualization.extend({
                 canvas.stroke()
             })
 
+            if(options.tooltips && highlighted.length) {
+                self.showTooltip(self.data.nodes[highlighted[0]]);
+            }
+
         }
 
         draw();
@@ -269,18 +287,18 @@ var Visualization = LightningVisualization.extend({
         var retName = data.name || [];
         var styles = this.styles
 
-        var c, s, k
+        var c, s
 
         data.nodes = data.nodes.map(function (d,i) {
             d.x = d[0]
             d.y = d[1]
             d.i = i
-            d.n = retName[i]
             c = retColor.length > 1 ? retColor[i] : retColor[0]
             s = retSize.length > 1 ? retSize[i] : retSize[0]
             d.c = c ? c : styles.color
             d.k = c ? c.darker(0.75) : styles.stroke
             d.s = s ? s : styles.size
+            d.l = (data.labels || []).length > i ? data.labels[i] : null;
             return d;
         });
 
@@ -348,6 +366,64 @@ var Visualization = LightningVisualization.extend({
         var start = self.data.nodes[link.source]
         var end = self.data.nodes[link.target]
         return [[self.x(start.x), self.y(start.y)], [self.x(end.x), self.y(end.y)]]
+    },
+
+    getLabelForDataPoint: function(d) {
+        if(!_.isNull(d.l) && !_.isUndefined(d.l)) {
+            return d.l;
+        }
+        return ('id: ' + d.i);
+    },
+
+    buildTooltip: function(d) {
+
+        var label = this.getLabelForDataPoint(d);
+        this.removeTooltip();
+
+        var cx = this.x(d.x);
+        var cy = this.y(d.y);
+        if(cx < 0 || cx > (this.width - this.margin.left - this.margin.right)) {
+            return;
+        }
+        if(cy < 0 || cy > (this.height - this.margin.top - this.margin.bottom)) {
+            return;
+        }
+
+        this.tooltipEl = document.createElement('div');
+            
+        this.tooltipEl.innerHTML = label;
+        this.tooltipEl.style.left = (this.x(d.x) + this.margin.left - 50) + 'px';
+        this.tooltipEl.style.bottom = (this.height - this.y(d.y) + d.s + 5) + 'px';
+        this.tooltipEl.style.position = 'absolute';
+        this.tooltipEl.style.backgroundColor = 'rgba(0, 0, 0, 0.65)';
+        this.tooltipEl.style.textAlign = 'center';
+        this.tooltipEl.style.color = 'white';
+        this.tooltipEl.style.paddingTop = '5px';
+        this.tooltipEl.style.paddingBottom = '5px';
+        this.tooltipEl.style.fontSize = '12px';
+        this.tooltipEl.style.borderRadius = '4px';
+        this.tooltipEl.style.width = '100px';
+        this.tooltipEl.style.zIndex = '999';
+
+    },
+
+    renderTooltip: function() {
+        var container = this.qwery(this.selector + ' div')[0];
+        if(this.tooltipEl && container) {
+            container.appendChild(this.tooltipEl);
+        }
+    },
+
+    showTooltip: function(d) {
+        this.buildTooltip(d);
+        this.renderTooltip();
+    },
+
+    removeTooltip: function() {
+        if(this.tooltipEl) {
+            this.tooltipEl.remove();
+            this.tooltipEl = null;
+        }
     }
 
 });
