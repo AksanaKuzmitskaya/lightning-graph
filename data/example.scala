@@ -3,9 +3,13 @@ import scala.util.Random
 
 val lgn = Lightning()
 
-val x = Array.fill(100)(Random.nextFloat() * 15)
-val y = Array.fill(100)(Random.nextFloat() * 15)
-val group = Array.fill(100)(Random.nextFloat() * 5).map(_.toInt)
-val size = Array.fill(100)(Random.nextFloat() * 20 + 5)
+val mat = Array.fill(10)(Array.fill(10)(Random.nextDouble()).map{ d =>
+	if (d < 0.1) {
+		d
+	} else {
+		0.0
+	}
+})
+val group = Array.fill(10)(Random.nextInt)
 
-lgn.scatter(x, y, group=group, size=size)
+lgn.graph(mat, group=group)

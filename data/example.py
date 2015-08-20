@@ -1,11 +1,10 @@
 from lightning import Lightning
-from numpy import random, ceil, array
+from numpy import random
 
 lgn = Lightning()
 
-x = random.randn(100) * 15
-y = random.randn(100) * 15
-group = ceil(random.rand(100) * 5)
-size = random.rand(100) * 20 + 5
+mat = random.rand(10,10)
+mat[mat>0.1] = 0
+group = (random.rand(10) * 5).astype('int')
 
-lgn.scatter(x, y, group=group, size=size, alpha=alpha)
+lgn.force(mat, group=group)
