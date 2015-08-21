@@ -76,7 +76,9 @@ var Visualization = LightningVisualization.extend({
             .call(zoom)
             .on("click", mouseHandler)
             .on("dblclick.zoom", null)
-            .node().getContext("2d")
+
+        var ctx = canvas
+            .node().getContext('2d');
 
         if (!self.options.zoom) {
             canvas.on("wheel.zoom", null);
@@ -202,7 +204,7 @@ var Visualization = LightningVisualization.extend({
         d3.select(selector).attr("tabindex", -1)
 
         function redraw() {
-            canvas.clearRect(0, 0, width, height);
+            ctx.clearRect(0, 0, width, height);
             draw()
         }
 
@@ -231,16 +233,16 @@ var Visualization = LightningVisualization.extend({
                 }
 
                 var line = self.getLine(l)
-                canvas.strokeStyle = utils.buildRGBA(linkStrokeColor, alpha);
-                canvas.lineWidth = 1 * Math.sqrt(l.value);
-                canvas.lineJoin = 'round';
-                canvas.beginPath();
-                canvas.moveTo(line[0][0], line[0][1])
+                ctx.strokeStyle = utils.buildRGBA(linkStrokeColor, alpha);
+                ctx.lineWidth = 1 * Math.sqrt(l.value);
+                ctx.lineJoin = 'round';
+                ctx.beginPath();
+                ctx.moveTo(line[0][0], line[0][1])
                 var i
                 for (i = 1; i < line.length; i++) { 
-                    canvas.lineTo(line[i][0], line[i][1]);
+                    ctx.lineTo(line[i][0], line[i][1]);
                 }
-                canvas.stroke()
+                ctx.stroke()
 
             })
 
@@ -268,13 +270,13 @@ var Visualization = LightningVisualization.extend({
                     stroke = n.k
                 }
 
-                canvas.beginPath();
-                canvas.arc(self.x(n.x), self.y(n.y), n.s, 0, 2 * Math.PI, false);
-                canvas.fillStyle = utils.buildRGBA(n.c, alpha)
-                canvas.lineWidth = strokeWidth
-                canvas.strokeStyle = utils.buildRGBA(stroke, alpha)
-                canvas.fill()
-                canvas.stroke()
+                ctx.beginPath();
+                ctx.arc(self.x(n.x), self.y(n.y), n.s, 0, 2 * Math.PI, false);
+                ctx.fillStyle = utils.buildRGBA(n.c, alpha)
+                ctx.lineWidth = strokeWidth
+                ctx.strokeStyle = utils.buildRGBA(stroke, alpha)
+                ctx.fill()
+                ctx.stroke()
             })
 
             if(options.tooltips && highlighted.length) {
