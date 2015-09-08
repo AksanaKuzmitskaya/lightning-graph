@@ -12,6 +12,6 @@ val mat = Array.fill(10)(Array.fill(10)(Random.nextDouble()).map{ d =>
 		0.0
 	}
 })
-val group = Array.fill(10)(Random.nextInt)
+val group = Array.fill(10)(Random.nextInt())
 
 lgn.graph(mat, group=group)
