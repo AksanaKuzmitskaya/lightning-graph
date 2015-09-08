@@ -45,7 +45,7 @@ var Visualization = LightningVisualization.extend({
         var links = data.links;
 
         // if points are colored use gray, otherwise use our default
-        var linkStrokeColor = (data.group || data.color) ? '#999' : '#A38EF3';
+        var linkStrokeColor = (data.group || data.color || data.values) ? '#999' : '#A38EF3';
 
         // set opacity inversely proportional to number of links
         var linkStrokeOpacity = Math.max(1 - 0.0005 * links.length, 0.5);
