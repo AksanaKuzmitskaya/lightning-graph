@@ -37,7 +37,6 @@ var Visualization = LightningVisualization.extend({
         var data = this.data;
         var width = this.width;
         var height = this.height;
-        var selector = this.selector;
         var options = this.options;
         var self = this;
 
@@ -61,7 +60,7 @@ var Visualization = LightningVisualization.extend({
             .y(self.y)
             .on('zoom', zoomed);
 
-        var container = d3.select(selector)
+        var container = d3.select(this.el)
             .append('div')
             .style('position', 'relative')
             .style('overflow', 'hidden')
@@ -163,7 +162,7 @@ var Visualization = LightningVisualization.extend({
             d3.selectAll('.brush')
                 .style('pointer-events', 'none')
 
-            d3.select(selector).on("keydown", function() {
+            d3.select(this.el).on("keydown", function() {
                 shiftKey = d3.event.shiftKey;
                 if (shiftKey) {
                     d3.selectAll('.brush').style('pointer-events', 'all')
@@ -171,7 +170,7 @@ var Visualization = LightningVisualization.extend({
                 }
             });
 
-            d3.select(selector).on("keyup", function() {
+            d3.select(this.el).on("keyup", function() {
                 if (shiftKey) {
                     d3.selectAll('.brush').style('pointer-events', 'none')
                     d3.selectAll('.brush .background').style('cursor', 'default')
@@ -201,7 +200,7 @@ var Visualization = LightningVisualization.extend({
         }
 
     
-        d3.select(selector).attr("tabindex", -1)
+        d3.select(this.el).attr("tabindex", -1)
 
         function redraw() {
             ctx.clearRect(0, 0, width, height);
